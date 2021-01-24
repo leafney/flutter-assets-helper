@@ -113,6 +113,8 @@ func copyIosFiles(pngList []IosGroup) {
 					// Todo err
 					fmt.Println("文件拷贝异常：", err)
 				}
+			} else {
+				fmt.Println("源文件不存在，跳过。 ", theFilePath)
 			}
 		}
 	}

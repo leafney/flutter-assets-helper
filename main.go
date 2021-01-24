@@ -13,6 +13,7 @@ import (
 func main() {
 
 	//run()
+
 	allFiles := loadFiles()
 	copyIosFiles(allFiles)
 
@@ -83,14 +84,10 @@ func run() {
 		for {
 			select {
 			case <-addNewCh:
-				//err = waitUntilFind(filename)
-				//if err != nil {
-				//	log.Fatalln(err)
-				//}
-				//err = watcher.Add(filename)
-				//if err != nil {
-				//	log.Fatalln(err)
-				//}
+				fmt.Println("开始处理了")
+
+				//allFiles := loadFiles()
+				//copyIosFiles(allFiles)
 			}
 		}
 	}()
