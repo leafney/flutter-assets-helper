@@ -10,12 +10,12 @@ import (
 
 func main() {
 
-	//run()
+	run()
 
 	//allFiles := loadFiles()
 	//copyIosFiles(allFiles)
 
-	test()
+	//test()
 }
 
 func test2() (interface{}, error) {
@@ -30,10 +30,11 @@ func test() {
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		go func() {
-			//res, err := g.Do("test", test2)
+			defer wg.Done()
+
 			res, err, shared := g.Do("test", test2)
 			fmt.Println(res, err, shared)
-			wg.Done()
+
 		}()
 	}
 	wg.Wait()

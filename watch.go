@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
+	"golang.org/x/sync/singleflight"
 	"log"
 	"os"
 	"os/signal"
@@ -53,6 +54,7 @@ func run() {
 	addNewCh := make(chan bool, 1)
 
 	go func() {
+
 		for {
 			select {
 			case event := <-watcher.Events:
@@ -61,6 +63,7 @@ func run() {
 				//	log.Printf("Write:  %s: %s", event.Op, event.Name)
 				case event.Op&fsnotify.Create == fsnotify.Create:
 					log.Printf("Create: %s: %s", event.Op, event.Name)
+
 					addNewCh <- true
 					//case event.Op&fsnotify.Remove == fsnotify.Remove:
 					//	log.Printf("Remove: %s: %s", event.Op, event.Name)
@@ -79,13 +82,26 @@ func run() {
 	}()
 
 	go func() {
+		g := singleflight.Group{}
 		for {
 			select {
 			case <-addNewCh:
 				fmt.Println("开始处理了")
 
-				//allFiles := loadFiles()
-				//copyIosFiles(allFiles)
+				go func() {
+					res, err, shared := g.Do("ttt2", func() (interface{}, error) {
+						// 设置等待一定时间后开始处理
+						time.Sleep(5 * time.Second)
+						fmt.Println("start test")
+
+						allFiles := loadFiles()
+						copyIosFiles(allFiles)
+
+						return 1, nil
+					})
+					fmt.Println(res, err, shared)
+				}()
+
 			}
 		}
 	}()
