@@ -1,2 +1,2 @@
 # flutter-assets-helper
-Flutter资源助手-fah
+Flutter资源管理助手-fah
