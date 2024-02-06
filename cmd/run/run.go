@@ -11,9 +11,13 @@ package run
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	"github.com/leafney/flutter-assets-helper/web"
 	"github.com/spf13/cobra"
+	"io/fs"
 	"log"
 	"net"
+	"net/http"
 )
 
 var runCmd = &cobra.Command{
@@ -35,9 +39,18 @@ var runCmd = &cobra.Command{
 func StartWeb(port int) {
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello World")
-	})
+	//app.Get("/", func(c *fiber.Ctx) error {
+	//	return c.SendString("Hello World")
+	//})
+
+	// webui
+	uiDist, err := fs.Sub(web.UiStatic, "dist")
+	if err != nil {
+
+	}
+	app.Use("/", filesystem.New(filesystem.Config{
+		Root: http.FS(uiDist),
+	}))
 
 	go func() {
 		ip := getLocalIP()
