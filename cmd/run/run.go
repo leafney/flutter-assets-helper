@@ -18,6 +18,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 )
 
 var runCmd = &cobra.Command{
@@ -53,10 +54,15 @@ func StartWeb(port int) {
 	}))
 
 	go func() {
-		ip := getLocalIP()
-		fmt.Printf("App running on:\n\n→  Local:    http://127.0.0.1:%d \n→  NetWork:  http://%s:%d\n\n", port, ip, port)
+		newPort, canUsed := getAvailablePort(port)
+		if !canUsed {
+			fmt.Printf("[Warn] Port number %d is occupied, automatically match port number: %d \n", port, newPort)
+		}
 
-		addr := fmt.Sprintf(":%d", port)
+		ip := getLocalIP()
+		fmt.Printf("App running on:\n\n→  Local:    http://127.0.0.1:%d \n→  NetWork:  http://%s:%d\n\n", newPort, ip, newPort)
+
+		addr := fmt.Sprintf(":%d", newPort)
 		if err := app.Listen(addr); err != nil {
 			log.Fatal("Failed to start Fiber web project: ", err)
 		}
@@ -85,4 +91,18 @@ func getLocalIP() string {
 		}
 	}
 	return "unknown"
+}
+
+func getAvailablePort(port int) (int, bool) {
+	// 标识提供的端口号是否可用
+	canUse := true
+	for {
+		conn, err := net.Dial("tcp", net.JoinHostPort("127.0.0.1", strconv.Itoa(port)))
+		if err != nil {
+			return port, canUse
+		}
+		_ = conn.Close()
+		port++
+		canUse = false
+	}
 }
