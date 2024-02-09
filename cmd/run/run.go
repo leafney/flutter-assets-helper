@@ -9,6 +9,7 @@
 package run
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
@@ -18,6 +19,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -27,6 +29,7 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		daemon, _ := cmd.Flags().GetBool("daemon")
 		port, _ := cmd.Flags().GetInt("port")
+
 		if daemon {
 			// Start Fiber web project in background (persistent execution)
 			go StartWeb(port)
@@ -35,6 +38,18 @@ var runCmd = &cobra.Command{
 			StartWeb(port)
 		}
 	},
+	PreRun: func(cmd *cobra.Command, args []string) {
+		file, _ := cmd.Flags().GetString("file")
+		log.Printf("file %v", file)
+		loadPubspec3(file)
+	},
+}
+
+func init() {
+	runCmd.Flags().BoolP("daemon", "d", false, "Run in daemon mode (persistent execution)")
+	runCmd.Flags().IntP("port", "p", 8080, "Port number to run the Gin web project")
+	runCmd.Flags().StringP("file", "f", "pubspec.yaml", "Flutter project default pubspec.yaml file")
+	rootCmd.AddCommand(runCmd)
 }
 
 func StartWeb(port int) {
@@ -71,12 +86,6 @@ func StartWeb(port int) {
 	select {}
 }
 
-func init() {
-	runCmd.Flags().BoolP("daemon", "d", false, "Run in daemon mode (persistent execution)")
-	runCmd.Flags().IntP("port", "p", 8080, "Port number to run the Gin web project")
-	rootCmd.AddCommand(runCmd)
-}
-
 func getLocalIP() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -104,5 +113,25 @@ func getAvailablePort(port int) (int, bool) {
 		_ = conn.Close()
 		port++
 		canUse = false
+	}
+}
+
+func loadPubspec3(filePath string) {
+	fp, err := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	buf := bufio.NewScanner(fp)
+	for {
+		if !buf.Scan() {
+			break
+		}
+		line := buf.Text()
+		fmt.Println(line)
+		if line == "" {
+			fmt.Println("空白行")
+		}
+
 	}
 }
