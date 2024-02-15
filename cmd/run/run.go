@@ -11,6 +11,7 @@ package run
 import (
 	"bufio"
 	"fmt"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/leafney/flutter-assets-helper/web"
@@ -58,6 +59,26 @@ func StartWeb(port int) {
 	//app.Get("/", func(c *fiber.Ctx) error {
 	//	return c.SendString("Hello World")
 	//})
+
+	// websocket
+	app.Use("/ws", func(c *fiber.Ctx) error {
+		if websocket.IsWebSocketUpgrade(c) {
+			c.Locals("allowed", true)
+			return c.Next()
+		}
+		return fiber.ErrUpgradeRequired
+	})
+
+	app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
+		// Access the *websocket.Conn methods
+		// For example:
+		// c.Locals("allowed") // true
+		// c.Params("id") // 123
+		// c.Query("v") // 1.0
+		// c.Cookies("session") // ""
+		// c.ReadMessage()
+		// c.WriteMessage()
+	}))
 
 	// webui
 	uiDist, err := fs.Sub(web.UiStatic, "dist")
