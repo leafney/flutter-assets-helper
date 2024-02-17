@@ -51,6 +51,7 @@ class XSocket {
 
     send(data) {
         this.socket.send(data);
+        // send(JSON.stringify(data));
     }
 
     sendFile(file) {
