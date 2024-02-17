@@ -96,16 +96,21 @@ func StartWeb(port int) {
 		log.Println("websocket 收到了消息")
 
 		var (
-			//mt  int
+			mt  int
 			msg []byte
 			err error
 		)
 		for {
-			if _, msg, err = c.ReadMessage(); err != nil {
+			if mt, msg, err = c.ReadMessage(); err != nil {
 				log.Println("read:", err)
 				break
 			}
 			log.Printf("recv: %s", msg)
+
+			if err = c.WriteMessage(mt, msg); err != nil {
+				log.Println("write:", err)
+				break
+			}
 		}
 	}, wsConf))
 

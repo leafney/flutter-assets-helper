@@ -1,42 +1,82 @@
-// import WebSocket from 'ws';
-import WebSocket from 'isomorphic-ws';
 
-class Websocket {
-
-    constructor(url, options = {}) {
+class XSocket {
+    constructor(url) {
         this.url = url;
-        this.options = options;
-        this.ws = null;
+        this.reconnectInterval = null;
     }
 
     connect() {
-        this.ws = new WebSocket(this.url, this.options);
+        this.socket = new WebSocket(this.url);
 
-        this.ws.onopen = () => {
-            console.log('websocket connection opened.');
-        };
-        this.ws.onmessage = (event) => {
-            console.log('websocket message received.', event.data);
-        };
-        this.ws.onerror = (error) => {
-            console.error('websocket error occurred.', error);
-        };
-        this.ws.onclose = () => {
-            console.log('websocket connection closed');
-        };
-
+        this.socket.onopen = this.onOpen.bind(this);
+        this.socket.onmessage = this.onMessage.bind(this);
+        this.socket.onclose = this.onClose.bind(this);
+        this.socket.onerror = this.onError.bind(this);
     }
 
-    send(data) {
-        if (this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(data);
-        } else {
-            console.error('websocket connection not open.');
+    onOpen(event) {
+        console.log('WebSocket连接已打开');
+        if (this.reconnectInterval) {
+            clearInterval(this.reconnectInterval); // 清除重连定时器
+            this.reconnectInterval = null;
         }
     }
 
+    onMessage(event) {
+        console.log('接收到消息:', event.data);
+    }
+
+    onClose(event) {
+        if (event.wasClean) {
+            console.log('WebSocket连接已正常关闭');
+        } else {
+            console.log('WebSocket连接异常断开，尝试重新连接...');
+            this.reconnect();
+        }
+    }
+
+    onError(error) {
+        console.error('WebSocket连接发生错误:', error);
+        this.reconnect();
+    }
+
+    reconnect() {
+        if (!this.reconnectInterval) {
+            this.reconnectInterval = setInterval(() => {
+                console.log('尝试重新连接...');
+                this.connect();
+            }, 3000); // 3秒后尝试重新连接
+        }
+    }
+
+    send(data) {
+        this.socket.send(data);
+    }
+
+    sendFile(file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            this.socket.send(event.target.result);
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
     close() {
-        this.ws.close();
+        this.socket.close();
     }
 }
-export default Websocket;
+
+export default XSocket;
+
+/*
+// 使用自定义的WebSocket类
+const customSocket = new CustomWebSocket('ws://localhost:3000/ws/123');
+customSocket.send('Hello, Backend!');
+
+// 发送文件示例
+const fileInput = document.getElementById('fileInput');
+fileInput.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  customSocket.sendFile(file);
+});
+*/ 
