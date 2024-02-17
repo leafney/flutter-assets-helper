@@ -3,6 +3,7 @@ module github.com/leafney/flutter-assets-helper
 go 1.21
 
 require (
+	github.com/gofiber/contrib/websocket v1.3.0
 	github.com/gofiber/fiber/v2 v2.52.0
 	github.com/spf13/cobra v1.8.0
 )
@@ -10,7 +11,6 @@ require (
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/fasthttp/websocket v1.5.7 // indirect
-	github.com/gofiber/contrib/websocket v1.3.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.17.6 // indirect

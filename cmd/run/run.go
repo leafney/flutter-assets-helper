@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 var runCmd = &cobra.Command{
@@ -56,20 +57,32 @@ func init() {
 func StartWeb(port int) {
 	app := fiber.New()
 
+	log.Println("app start")
+
 	//app.Get("/", func(c *fiber.Ctx) error {
 	//	return c.SendString("Hello World")
 	//})
 
 	// websocket
 	app.Use("/ws", func(c *fiber.Ctx) error {
+		log.Println("调用了 websocket111")
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
+			log.Println("调用了 websocket222")
 			return c.Next()
 		}
 		return fiber.ErrUpgradeRequired
 	})
 
-	app.Get("/ws/:id", websocket.New(func(c *websocket.Conn) {
+	wsConf := websocket.Config{
+		HandshakeTimeout: 100 * time.Second,
+		Origins: []string{
+			"http://localhost:8080",
+			"http://127.0.0.1:8080",
+		},
+	}
+
+	app.Get("/ws", websocket.New(func(c *websocket.Conn) {
 		// Access the *websocket.Conn methods
 		// For example:
 		// c.Locals("allowed") // true
@@ -78,7 +91,23 @@ func StartWeb(port int) {
 		// c.Cookies("session") // ""
 		// c.ReadMessage()
 		// c.WriteMessage()
-	}))
+
+		//log.Println(c.Params("id"))
+		log.Println("websocket 收到了消息")
+
+		var (
+			//mt  int
+			msg []byte
+			err error
+		)
+		for {
+			if _, msg, err = c.ReadMessage(); err != nil {
+				log.Println("read:", err)
+				break
+			}
+			log.Printf("recv: %s", msg)
+		}
+	}, wsConf))
 
 	// webui
 	uiDist, err := fs.Sub(web.UiStatic, "dist")
