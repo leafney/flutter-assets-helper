@@ -13,9 +13,13 @@ pnpm run build
 ## install
 
 ```
-pnpm add ws
-
 pnpm add path
 
 pnpm add -D @types/node
+
+pnpm add -D naive-ui
+
+pnpm add -D unplugin-auto-import
+
+
 ```

@@ -52,12 +52,33 @@ const fasong = () => {
 
 }
 
+const customRequest = ({ file }: any) => {
+  console.log(file);
+  myWs.sendFile(file.file as File);
+}
+
 </script>
 
 <template>
   <h1>{{ msg }}</h1>
   <h1>{{ count }}--连接状态：{{ connectSts }}</h1>
   <button @click="fasong">发送</button>
+
+  <n-upload directory-dnd :custom-request="customRequest">
+    <n-upload-dragger>
+      <div style="margin-bottom: 12px">
+        <n-icon size="48" :depth="3">
+          <archive-icon />
+        </n-icon>
+      </div>
+      <n-text style="font-size: 16px">
+        点击或者拖动文件到该区域来上传
+      </n-text>
+      <n-p depth="3" style="margin: 8px 0 0 0">
+        请不要上传敏感数据，比如你的银行卡号和密码，信用卡号有效期和安全码
+      </n-p>
+    </n-upload-dragger>
+  </n-upload>
 </template>
 
 <style scoped></style>

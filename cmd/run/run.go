@@ -10,12 +10,14 @@ package run
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
 	"github.com/leafney/flutter-assets-helper/web"
 	"github.com/spf13/cobra"
+	"io"
 	"io/fs"
 	"log"
 	"net"
@@ -105,12 +107,24 @@ func StartWeb(port int) {
 				log.Println("read:", err)
 				break
 			}
-			log.Printf("recv: %s", msg)
+			log.Printf("文件类型为 %v", mt)
 
-			if err = c.WriteMessage(mt, msg); err != nil {
-				log.Println("write:", err)
-				break
+			//log.Printf("recv: %s", msg)
+
+			//
+			//log.Println(string(msg))
+
+			reader := bytes.NewReader(msg)
+			bts, err := io.ReadAll(reader)
+			err = os.WriteFile("abc.png", bts, 0644)
+			if err != nil {
+				log.Fatalln(err)
 			}
+
+			//if err = c.WriteMessage(mt, msg); err != nil {
+			//	log.Println("write:", err)
+			//	break
+			//}
 		}
 	}, wsConf))
 
