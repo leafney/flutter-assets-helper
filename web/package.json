@@ -6,10 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "proto": "pbjs -t static-module --es6 -w es6 -o src/proto/proto.js ../pkg/protocol/message.proto && pbts -o src/proto/index.d.ts src/proto/proto.js"
   },
   "dependencies": {
     "path": "^0.12.7",
+    "protobufjs": "^7.2.6",
     "vue": "^3.3.11"
   },
   "devDependencies": {

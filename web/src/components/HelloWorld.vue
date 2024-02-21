@@ -2,6 +2,10 @@
 
 import { onMounted, ref } from 'vue'
 
+// import protobuf from "protobufjs";
+
+import { protocol } from "@/proto/proto";
+
 defineProps<{ msg: string }>()
 
 const count = ref(0)
@@ -52,9 +56,33 @@ const fasong = () => {
 
 }
 
+
 const customRequest = ({ file }: any) => {
   console.log(file);
-  myWs.sendFile(file.file as File);
+  // 直接传输图片文件
+  // myWs.sendFile(file.file as File);
+
+  // let name = file.name;
+
+  // 使用protobuf方式封装后传输
+  let reader = new FileReader();
+  reader.onload = (event: ProgressEvent<FileReader>) => {
+    if (event.target && event.target.result) {
+      let theFile = new Uint8Array(event.target.result as ArrayBuffer);
+      let data = {
+        type: 2,
+        content: "",
+        contentType: 3,
+        file: theFile,
+        fileSuffix: ".png",
+      }
+
+      const message = protocol.Message.create(data);
+      myWs.send(protocol.Message.encode(message).finish());
+    }
+  };
+  reader.readAsArrayBuffer(file.file);
+
 }
 
 </script>

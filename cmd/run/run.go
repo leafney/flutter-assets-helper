@@ -15,8 +15,10 @@ import (
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
+	"github.com/leafney/flutter-assets-helper/pkg/protocol"
 	"github.com/leafney/flutter-assets-helper/web"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"io/fs"
 	"log"
@@ -114,9 +116,23 @@ func StartWeb(port int) {
 			//
 			//log.Println(string(msg))
 
-			reader := bytes.NewReader(msg)
-			bts, err := io.ReadAll(reader)
-			err = os.WriteFile("abc.png", bts, 0644)
+			/*
+				// 直接上传图片文件后，接收并保存到本地
+				reader := bytes.NewReader(msg)
+				bts, err := io.ReadAll(reader)
+				err = os.WriteFile("abc.png", bts, 0644)
+				if err != nil {
+					log.Fatalln(err)
+				}
+			*/
+
+			message := &protocol.Message{}
+			proto.Unmarshal(msg, message)
+
+			//log.Println(rose.JsonMarshalStr(message))
+
+			bts, err := io.ReadAll(bytes.NewReader(message.File))
+			err = os.WriteFile("abcd.png", bts, 0644)
 			if err != nil {
 				log.Fatalln(err)
 			}
