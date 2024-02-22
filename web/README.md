@@ -25,5 +25,7 @@ pnpm add protobufjs
 
 pnpm add -g protobufjs-cli
 
+pnpm add vue-clipboard3
+
 
 ```

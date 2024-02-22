@@ -65,8 +65,6 @@ func StartWeb(port int) {
 
 	// websocket
 	app.Use("/ws", func(c *fiber.Ctx) error {
-		log.Println("调用了 websocket")
-
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
 			return c.Next()

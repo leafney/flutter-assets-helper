@@ -9,26 +9,32 @@
 package socket
 
 import (
+	"github.com/gofiber/contrib/websocket"
 	"log"
 )
 
 var XServer = NewServer()
 
 type Server struct {
-	Client    *Client
-	Operation chan []byte
+	Client     *Client
+	Operation  chan []byte
+	Register   chan *websocket.Conn
+	UnRegister chan *websocket.Conn
 }
 
 func NewServer() *Server {
 	return &Server{
-		Client:    nil,
-		Operation: make(chan []byte),
+		Client:     nil,
+		Operation:  make(chan []byte),
+		Register:   make(chan *websocket.Conn),
+		UnRegister: make(chan *websocket.Conn),
 	}
 }
 
 func (s *Server) Start() {
 	for {
 		select {
+
 		case message := <-s.Operation:
 			log.Printf("接收到了 %v", string(message))
 

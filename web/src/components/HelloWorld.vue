@@ -2,6 +2,8 @@
 
 import { onMounted, ref } from 'vue'
 
+import ColorValue from '@/components/ColorValue.vue';
+
 // import protobuf from "protobufjs";
 
 import { protocol } from "@/proto/proto";
@@ -118,6 +120,10 @@ const customRequest = ({ file }: any) => {
       </n-p>
     </n-upload-dragger>
   </n-upload>
+
+  <br>
+  <ColorValue></ColorValue>
 </template>
+
 
 <style scoped></style>
