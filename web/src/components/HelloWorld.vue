@@ -19,7 +19,7 @@ const connectSts = ref(0)
 
 import YSocket from '@/utils/ysocket';
 
-const myWs = new YSocket('ws://localhost:8080/ws');
+const myWs = new YSocket('ws://localhost:8080/ws', 30000);
 
 myWs.openCallback = (ev: Event) => {
   console.log('11openCallback ', ev);
@@ -48,15 +48,26 @@ onMounted(() => {
   console.log('connected end');
 })
 
+// 发送文字
 const fasong = () => {
-  // myWs.send('hello')
 
-  myWs.send('okok heha');
+  // myWs.send('okok heha');
+
+  let data = {
+    type: 2,
+    content: "okok hahaha",
+    contentType: 1,
+    fileSuffix: "",
+  }
+
+  const message = protocol.Message.create(data);
+  myWs.send(protocol.Message.encode(message).finish());
+
   console.log('点击了按钮');
 
 }
 
-
+// 上传图片
 const customRequest = ({ file }: any) => {
   console.log(file);
   // 直接传输图片文件

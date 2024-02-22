@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    ColorValue: typeof import('./src/components/ColorValue.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     NIcon: typeof import('naive-ui')['NIcon']
     NP: typeof import('naive-ui')['NP']

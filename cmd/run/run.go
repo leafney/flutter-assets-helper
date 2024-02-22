@@ -10,23 +10,19 @@ package run
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"github.com/gofiber/contrib/websocket"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/filesystem"
-	"github.com/leafney/flutter-assets-helper/pkg/protocol"
+	"github.com/leafney/flutter-assets-helper/internal/socket"
 	"github.com/leafney/flutter-assets-helper/web"
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/proto"
-	"io"
 	"io/fs"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 )
 
 var runCmd = &cobra.Command{
@@ -69,80 +65,91 @@ func StartWeb(port int) {
 
 	// websocket
 	app.Use("/ws", func(c *fiber.Ctx) error {
-		log.Println("调用了 websocket111")
+		log.Println("调用了 websocket")
+
 		if websocket.IsWebSocketUpgrade(c) {
 			c.Locals("allowed", true)
-			log.Println("调用了 websocket222")
 			return c.Next()
 		}
 		return fiber.ErrUpgradeRequired
 	})
 
-	wsConf := websocket.Config{
-		HandshakeTimeout: 100 * time.Second,
-		Origins: []string{
-			"http://localhost:8080",
-			"http://127.0.0.1:8080",
-		},
-	}
+	//wsConf := websocket.Config{
+	//	HandshakeTimeout: 100 * time.Second,
+	//	Origins: []string{
+	//		"http://localhost:8080",
+	//		"http://127.0.0.1:8080",
+	//	},
+	//}
 
 	app.Get("/ws", websocket.New(func(c *websocket.Conn) {
-		// Access the *websocket.Conn methods
-		// For example:
-		// c.Locals("allowed") // true
-		// c.Params("id") // 123
-		// c.Query("v") // 1.0
-		// c.Cookies("session") // ""
-		// c.ReadMessage()
-		// c.WriteMessage()
-
-		//log.Println(c.Params("id"))
-		log.Println("websocket 收到了消息")
-
-		var (
-			mt  int
-			msg []byte
-			err error
-		)
-		for {
-			if mt, msg, err = c.ReadMessage(); err != nil {
-				log.Println("read:", err)
-				break
-			}
-			log.Printf("文件类型为 %v", mt)
-
-			//log.Printf("recv: %s", msg)
-
-			//
-			//log.Println(string(msg))
-
-			/*
-				// 直接上传图片文件后，接收并保存到本地
-				reader := bytes.NewReader(msg)
-				bts, err := io.ReadAll(reader)
-				err = os.WriteFile("abc.png", bts, 0644)
-				if err != nil {
-					log.Fatalln(err)
-				}
-			*/
-
-			message := &protocol.Message{}
-			proto.Unmarshal(msg, message)
-
-			//log.Println(rose.JsonMarshalStr(message))
-
-			bts, err := io.ReadAll(bytes.NewReader(message.File))
-			err = os.WriteFile("abcd.png", bts, 0644)
-			if err != nil {
-				log.Fatalln(err)
-			}
-
-			//if err = c.WriteMessage(mt, msg); err != nil {
-			//	log.Println("write:", err)
-			//	break
-			//}
+		client := &socket.Client{
+			Conn: c,
+			Send: make(chan []byte),
 		}
-	}, wsConf))
+		// 处理消息的接收和发送
+		go client.Read()
+		go client.Write()
+
+		// 这里要一直阻塞
+		select {}
+	}))
+
+	//app.Get("/ws", websocket.New(func(c *websocket.Conn) {
+	//	// Access the *websocket.Conn methods
+	//	// For example:
+	//	// c.Locals("allowed") // true
+	//	// c.Params("id") // 123
+	//	// c.Query("v") // 1.0
+	//	// c.Cookies("session") // ""
+	//	// c.ReadMessage()
+	//	// c.WriteMessage()
+	//
+	//	//log.Println(c.Params("id"))
+	//	log.Println("websocket 收到了消息")
+	//
+	//	var (
+	//		mt  int
+	//		msg []byte
+	//		err error
+	//	)
+	//	for {
+	//		if mt, msg, err = c.ReadMessage(); err != nil {
+	//			log.Println("read:", err)
+	//			break
+	//		}
+	//		log.Printf("文件类型为 %v", mt)
+	//
+	//		//log.Printf("recv: %s", msg)
+	//
+	//
+	//		/*
+	//			// 直接上传图片文件后，接收并保存到本地
+	//			reader := bytes.NewReader(msg)
+	//			bts, err := io.ReadAll(reader)
+	//			err = os.WriteFile("abc.png", bts, 0644)
+	//			if err != nil {
+	//				log.Fatalln(err)
+	//			}
+	//		*/
+	//
+	//		message := &protocol.Message{}
+	//		proto.Unmarshal(msg, message)
+	//
+	//		//log.Println(rose.JsonMarshalStr(message))
+	//
+	//		bts, err := io.ReadAll(bytes.NewReader(message.File))
+	//		err = os.WriteFile("abcd.png", bts, 0644)
+	//		if err != nil {
+	//			log.Fatalln(err)
+	//		}
+	//
+	//		//if err = c.WriteMessage(mt, msg); err != nil {
+	//		//	log.Println("write:", err)
+	//		//	break
+	//		//}
+	//	}
+	//}, wsConf))
 
 	// webui
 	uiDist, err := fs.Sub(web.UiStatic, "dist")
@@ -154,6 +161,8 @@ func StartWeb(port int) {
 	}))
 
 	go func() {
+		go socket.XServer.Start()
+
 		newPort, canUsed := getAvailablePort(port)
 		if !canUsed {
 			fmt.Printf("[Warn] Port number %d is occupied, automatically match port number: %d \n", port, newPort)
