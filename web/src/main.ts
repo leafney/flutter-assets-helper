@@ -13,4 +13,10 @@ const app = createApp(App)
 
 // app.provide('socket', soc);
 
+import YSocket from '@/utils/ysocket';
+const myWs = new YSocket('ws://localhost:8080/ws', 10000);
+myWs.connect();
+
+app.provide('socket', myWs);
+
 app.mount('#app')

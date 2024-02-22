@@ -16,3 +16,5 @@
 
 .idea/
 pubspec.yaml
+tmp
+.DS_Store

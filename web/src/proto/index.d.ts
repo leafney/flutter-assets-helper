@@ -18,8 +18,8 @@ export namespace protocol {
         /** Message file */
         file?: (Uint8Array|null);
 
-        /** Message fileSuffix */
-        fileSuffix?: (string|null);
+        /** Message fileName */
+        fileName?: (string|null);
     }
 
     /** Represents a Message. */
@@ -43,8 +43,8 @@ export namespace protocol {
         /** Message file. */
         public file: Uint8Array;
 
-        /** Message fileSuffix. */
-        public fileSuffix: string;
+        /** Message fileName. */
+        public fileName: string;
 
         /**
          * Creates a new Message instance using the specified properties.

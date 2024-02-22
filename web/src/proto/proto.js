@@ -26,7 +26,7 @@ export const protocol = $root.protocol = (() => {
          * @property {string|null} [content] Message content
          * @property {number|Long|null} [contentType] Message contentType
          * @property {Uint8Array|null} [file] Message file
-         * @property {string|null} [fileSuffix] Message fileSuffix
+         * @property {string|null} [fileName] Message fileName
          */
 
         /**
@@ -77,12 +77,12 @@ export const protocol = $root.protocol = (() => {
         Message.prototype.file = $util.newBuffer([]);
 
         /**
-         * Message fileSuffix.
-         * @member {string} fileSuffix
+         * Message fileName.
+         * @member {string} fileName
          * @memberof protocol.Message
          * @instance
          */
-        Message.prototype.fileSuffix = "";
+        Message.prototype.fileName = "";
 
         /**
          * Creates a new Message instance using the specified properties.
@@ -116,8 +116,8 @@ export const protocol = $root.protocol = (() => {
                 writer.uint32(/* id 3, wireType 0 =*/24).int64(message.contentType);
             if (message.file != null && Object.hasOwnProperty.call(message, "file"))
                 writer.uint32(/* id 4, wireType 2 =*/34).bytes(message.file);
-            if (message.fileSuffix != null && Object.hasOwnProperty.call(message, "fileSuffix"))
-                writer.uint32(/* id 5, wireType 2 =*/42).string(message.fileSuffix);
+            if (message.fileName != null && Object.hasOwnProperty.call(message, "fileName"))
+                writer.uint32(/* id 5, wireType 2 =*/42).string(message.fileName);
             return writer;
         };
 
@@ -169,7 +169,7 @@ export const protocol = $root.protocol = (() => {
                         break;
                     }
                 case 5: {
-                        message.fileSuffix = reader.string();
+                        message.fileName = reader.string();
                         break;
                     }
                 default:
@@ -219,9 +219,9 @@ export const protocol = $root.protocol = (() => {
             if (message.file != null && message.hasOwnProperty("file"))
                 if (!(message.file && typeof message.file.length === "number" || $util.isString(message.file)))
                     return "file: buffer expected";
-            if (message.fileSuffix != null && message.hasOwnProperty("fileSuffix"))
-                if (!$util.isString(message.fileSuffix))
-                    return "fileSuffix: string expected";
+            if (message.fileName != null && message.hasOwnProperty("fileName"))
+                if (!$util.isString(message.fileName))
+                    return "fileName: string expected";
             return null;
         };
 
@@ -262,8 +262,8 @@ export const protocol = $root.protocol = (() => {
                     $util.base64.decode(object.file, message.file = $util.newBuffer($util.base64.length(object.file)), 0);
                 else if (object.file.length >= 0)
                     message.file = object.file;
-            if (object.fileSuffix != null)
-                message.fileSuffix = String(object.fileSuffix);
+            if (object.fileName != null)
+                message.fileName = String(object.fileName);
             return message;
         };
 
@@ -299,7 +299,7 @@ export const protocol = $root.protocol = (() => {
                     if (options.bytes !== Array)
                         object.file = $util.newBuffer(object.file);
                 }
-                object.fileSuffix = "";
+                object.fileName = "";
             }
             if (message.type != null && message.hasOwnProperty("type"))
                 if (typeof message.type === "number")
@@ -315,8 +315,8 @@ export const protocol = $root.protocol = (() => {
                     object.contentType = options.longs === String ? $util.Long.prototype.toString.call(message.contentType) : options.longs === Number ? new $util.LongBits(message.contentType.low >>> 0, message.contentType.high >>> 0).toNumber() : message.contentType;
             if (message.file != null && message.hasOwnProperty("file"))
                 object.file = options.bytes === String ? $util.base64.encode(message.file, 0, message.file.length) : options.bytes === Array ? Array.prototype.slice.call(message.file) : message.file;
-            if (message.fileSuffix != null && message.hasOwnProperty("fileSuffix"))
-                object.fileSuffix = message.fileSuffix;
+            if (message.fileName != null && message.hasOwnProperty("fileName"))
+                object.fileName = message.fileName;
             return object;
         };
 

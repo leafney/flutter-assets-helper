@@ -11,6 +11,7 @@ declare module 'vue' {
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     NIcon: typeof import('naive-ui')['NIcon']
     NP: typeof import('naive-ui')['NP']
+    NTag: typeof import('naive-ui')['NTag']
     NText: typeof import('naive-ui')['NText']
     NUpload: typeof import('naive-ui')['NUpload']
     NUploadDragger: typeof import('naive-ui')['NUploadDragger']

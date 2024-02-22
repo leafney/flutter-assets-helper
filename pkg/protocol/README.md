@@ -11,9 +11,9 @@ protoc --go_out=./ ./protocol/message.proto
 或者，使用命令：
 
 ```
-cd <project_dir>
+cd <project_dir>/pkg/protocol
 
-./pkg/protocol/build.sh
+./build.sh
 ```
 
 ### vue3 + ts
@@ -43,5 +43,4 @@ pnpm run proto
 ```
 
 ---
-
 

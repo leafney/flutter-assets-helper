@@ -1,13 +1,44 @@
 <script setup lang="ts">
+import { protocol } from "@/proto/proto";
+import YSocket from "@/utils/ysocket";
+import { inject } from "vue";
 
-const customRequest = (file: any) => {
+const myWs = inject('socket', new YSocket(''))
+
+// 上传图片
+const customRequest = ({ file }: any) => {
     console.log(file);
+    // 直接传输图片文件
+    // myWs.sendFile(file.file as File);
+
+    let name = file.name;
+
+    // 使用protobuf方式封装后传输
+    let reader = new FileReader();
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+        if (event.target && event.target.result) {
+            let theFile = new Uint8Array(event.target.result as ArrayBuffer);
+            let data = {
+                type: 2,
+                content: "",
+                contentType: 3,
+                file: theFile,
+                fileName: name,
+            }
+
+            const message = protocol.Message.create(data);
+            myWs.send(protocol.Message.encode(message).finish());
+        }
+    };
+    reader.readAsArrayBuffer(file.file);
+
 }
+
 
 </script>
 <template>
     <div>
-        <n-upload directory-dnd :custom-request="customRequest">
+        <n-upload directory-dnd :show-file-list="false" :custom-request="customRequest">
             <n-upload-dragger>
                 <div style="margin-bottom: 12px">
                     <n-icon size="48" :depth="3">

@@ -11,3 +11,10 @@ package vars
 const (
 	HeartBeat int64 = 1
 )
+
+const (
+	ContentTypeText    = 1
+	ContentTypeColor   = 2
+	ContentTypeImage   = 3
+	ContentTypeZipFile = 4
+)

@@ -1,17 +1,19 @@
 <script setup lang="ts">
 
-import { onMounted, ref } from 'vue'
+import { inject, onMounted, ref } from 'vue'
 
 import ColorValue from '@/components/ColorValue.vue';
+import Upload from "@/components/Upload.vue";
 
 // import protobuf from "protobufjs";
 
 import { protocol } from "@/proto/proto";
 
+
 defineProps<{ msg: string }>()
 
 const count = ref(0)
-const connectSts = ref(0)
+const connectSts = ref('')
 
 // import MySoc from '@/utils/mysoc';
 
@@ -21,30 +23,50 @@ const connectSts = ref(0)
 
 import YSocket from '@/utils/ysocket';
 
-const myWs = new YSocket('ws://localhost:8080/ws', 30000);
+// const myWs = new YSocket('ws://localhost:8080/ws', 30000);
 
-myWs.openCallback = (ev: Event) => {
-  console.log('11openCallback ', ev);
-}
+const myWs = inject('socket', new YSocket(''));
+
+// myWs.openCallback = (ev: Event) => {
+//   console.log('11openCallback ', ev);
+// }
 
 myWs.messageCallback = (ev: MessageEvent) => {
-  console.log('11messageCallback ', ev.data, myWs.status);
+  console.log('11messageCallback ', ev.data);
 }
 
-myWs.closeCallback = (ev: any) => {
-  console.log('11closeCallback ', ev);
-}
+// myWs.closeCallback = (ev: any) => {
+//   console.log('11closeCallback ', ev);
+// }
 
 myWs.statusChangedCallback = (s: number) => {
   console.log('statusChangedCallback ', s);
-  connectSts.value = s;
+  let sts = '';
+  switch (s) {
+    case 1:
+      sts = '连接中';
+      break;
+    case 2:
+      sts = '已连接';
+      break;
+    case 3:
+      sts = '已关闭';
+      break;
+    case 4:
+      sts = '断线重连';
+      break;
+    default:
+      break;
+  }
+
+  connectSts.value = sts;
 }
 
 
 onMounted(() => {
   console.log('connected start')
   console.log(myWs)
-  myWs.connect();
+  // myWs.connect();
 
 
   console.log('connected end');
@@ -59,7 +81,6 @@ const fasong = () => {
     type: 2,
     content: "okok hahaha",
     contentType: 1,
-    fileSuffix: "",
   }
 
   const message = protocol.Message.create(data);
@@ -69,43 +90,44 @@ const fasong = () => {
 
 }
 
-// 上传图片
-const customRequest = ({ file }: any) => {
-  console.log(file);
-  // 直接传输图片文件
-  // myWs.sendFile(file.file as File);
+// // 上传图片
+// const customRequest = ({ file }: any) => {
+//   console.log(file);
+//   // 直接传输图片文件
+//   // myWs.sendFile(file.file as File);
 
-  // let name = file.name;
+//   // let name = file.name;
 
-  // 使用protobuf方式封装后传输
-  let reader = new FileReader();
-  reader.onload = (event: ProgressEvent<FileReader>) => {
-    if (event.target && event.target.result) {
-      let theFile = new Uint8Array(event.target.result as ArrayBuffer);
-      let data = {
-        type: 2,
-        content: "",
-        contentType: 3,
-        file: theFile,
-        fileSuffix: ".png",
-      }
+//   // 使用protobuf方式封装后传输
+//   let reader = new FileReader();
+//   reader.onload = (event: ProgressEvent<FileReader>) => {
+//     if (event.target && event.target.result) {
+//       let theFile = new Uint8Array(event.target.result as ArrayBuffer);
+//       let data = {
+//         type: 2,
+//         content: "",
+//         contentType: 3,
+//         file: theFile,
+//         fileSuffix: ".png",
+//       }
 
-      const message = protocol.Message.create(data);
-      myWs.send(protocol.Message.encode(message).finish());
-    }
-  };
-  reader.readAsArrayBuffer(file.file);
+//       const message = protocol.Message.create(data);
+//       myWs.send(protocol.Message.encode(message).finish());
+//     }
+//   };
+//   reader.readAsArrayBuffer(file.file);
 
-}
+// }
 
 </script>
 
 <template>
   <h1>{{ msg }}</h1>
   <h1>{{ count }}--连接状态：{{ connectSts }}</h1>
-  <button @click="fasong">发送</button>
-
-  <n-upload directory-dnd :custom-request="customRequest">
+  <br>
+  <button @click="fasong">发送文字</button>
+  <br>
+  <!-- <n-upload directory-dnd :custom-request="customRequest">
     <n-upload-dragger>
       <div style="margin-bottom: 12px">
         <n-icon size="48" :depth="3">
@@ -119,8 +141,9 @@ const customRequest = ({ file }: any) => {
         请不要上传敏感数据，比如你的银行卡号和密码，信用卡号有效期和安全码
       </n-p>
     </n-upload-dragger>
-  </n-upload>
+  </n-upload> -->
 
+  <Upload></Upload>
   <br>
   <ColorValue></ColorValue>
 </template>

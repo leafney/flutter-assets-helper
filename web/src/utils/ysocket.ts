@@ -131,6 +131,7 @@ class YSocket {
 
 export default YSocket;
 
+
 /* 第一版实现
 class YSocket {
     constructor(url, openCallback, messageCallback, errorCallback) {
